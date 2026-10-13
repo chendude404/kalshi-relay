@@ -1,0 +1,26 @@
+name: kalshi-relay
+
+# Each run loops for ~5 h 40 min. The schedule fires every 30 min, and the
+# concurrency group keeps one run active plus one queued, so the queued run takes
+# over within about a minute of the active one finishing.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: relay
+  cancel-in-progress: false
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node relay.mjs --minutes 340
+        env:
+          BOT_URL: ${{ secrets.BOT_URL }}
